@@ -12,6 +12,8 @@ public class CardChecker {
 
     public CardCombination getCombination(List<CardModel> cardModels) {
 
+        // CR: The method should declare that it's throwing these exceptions, and they should be handled by the calling method
+        // Also you can define your own poker exceptions, and they can be different exceptions for each case
         if (cardModels == null || cardModels.size() == 0) {
             throw new IllegalStateException("You should provide card set");
         } else if (cardModels.size() != 5) {
@@ -19,6 +21,7 @@ public class CardChecker {
         }
 
 
+        // CR: Typo: it's spelled "Straight"
         if (isStreet(cardModels)) {
             return CardCombination.STREET;
         }
@@ -32,6 +35,7 @@ public class CardChecker {
         Set<Map.Entry<CardModel, Long>> groupedCardModelEntries = groupedCardModel.entrySet();
 
         switch (groupedCardModelEntries.size()) {
+            // CR: Please move to constants that describe what each case represents
             case 2:
                 if (isFourOfKind(groupedCardModelEntries)) {
                     return CardCombination.FOUR_OF_KIND;
@@ -47,6 +51,7 @@ public class CardChecker {
             case 4:
                 return CardCombination.PAIR;
             default:
+                // CR: this should also should be an exception like "You should provide 5 cards" is an exception
                 return CardCombination.NO_COMBINATION;
         }
     }
@@ -55,6 +60,7 @@ public class CardChecker {
 
         List<Integer> cardModelStrengthList = cardModels.stream()
                 .sorted(new StreetComparator())
+                // CR: getStrength - a card strength is called "Rank"
                 .map(CardModel::getStrength)
                 .collect(Collectors.toList());
 
@@ -71,6 +77,8 @@ public class CardChecker {
         return isStreet;
     }
 
+    // CR: in getCombination() you are receiving a List and not a set?
+    // is there a reason for the difference?
     private boolean isFourOfKind(Set<Map.Entry<CardModel, Long>> entries) {
         return isNumOfKind(entries, 4);
     }
