@@ -17,18 +17,18 @@ public enum CardModel {
     ACE('A', 14);
 
     private char symbol;
-    private int strength;
+    private int rank;
 
-    CardModel(char symbol, int strength) {
+    CardModel(char symbol, int rank) {
         this.symbol = symbol;
-        this.strength = strength;
+        this.rank = rank;
     }
 
     public char getSymbol() {
         return symbol;
     }
 
-    public int getStrength() {
-        return strength;
+    public int getRank() {
+        return rank;
     }
 }

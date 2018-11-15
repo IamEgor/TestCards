@@ -6,9 +6,10 @@ public enum CardCombination {
     PAIR(1),
     TWO_PAIRS(2),
     THREE_OF_KIND(3),
-    FULL_HOUSE(4),
-    FOUR_OF_KIND(5),
-    STREET(6);
+    STRAIGHT(4),
+    FULL_HOUSE(5),
+    FOUR_OF_KIND(6);
+
 
     private int strength;
 

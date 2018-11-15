@@ -1,11 +1,14 @@
 package cards;
 
 
+import cards.exception.CheatingDeckOfCardsException;
+import cards.exception.MalformedCardListException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class CardCheckerTest {
 
@@ -16,20 +19,30 @@ public class CardCheckerTest {
         mCardChecker = new CardChecker();
     }
 
-    @Test()
-    public void testStreet1() {
+    @Test(expected = MalformedCardListException.class)
+    public void testEmptyList() {
+        mCardChecker.getCombination(Collections.emptyList());
+    }
+
+    @Test(expected = MalformedCardListException.class)
+    public void testIncompleteDeck() {
+        mCardChecker.getCombination(Arrays.asList(CardModel.ACE, CardModel.QUEEN, CardModel.JACK, CardModel.KING));
+    }
+
+    @Test
+    public void testStraight1() {
         CardCombination combination1 = mCardChecker.getCombination(Arrays.asList(CardModel.ACE, CardModel.QUEEN, CardModel.JACK, CardModel.KING, CardModel.TEN));
-        Assert.assertEquals(CardCombination.STREET, combination1);
+        Assert.assertEquals(CardCombination.STRAIGHT, combination1);
         CardCombination combination2 = mCardChecker.getCombination(Arrays.asList(CardModel.ACE, CardModel.SEVEN, CardModel.JACK, CardModel.KING, CardModel.TEN));
-        Assert.assertNotEquals(CardCombination.STREET, combination2);
+        Assert.assertNotEquals(CardCombination.STRAIGHT, combination2);
     }
 
     @Test()
-    public void testStreet2() {
+    public void testStraight2() {
         CardCombination combination1 = mCardChecker.getCombination(Arrays.asList(CardModel.TWO, CardModel.THREE, CardModel.FIVE, CardModel.FOUR, CardModel.SIX));
-        Assert.assertEquals(CardCombination.STREET, combination1);
+        Assert.assertEquals(CardCombination.STRAIGHT, combination1);
         CardCombination combination2 = mCardChecker.getCombination(Arrays.asList(CardModel.TWO, CardModel.THREE, CardModel.FIVE, CardModel.FOUR, CardModel.THREE));
-        Assert.assertNotEquals(CardCombination.STREET, combination2);
+        Assert.assertNotEquals(CardCombination.STRAIGHT, combination2);
     }
 
     @Test()
@@ -70,5 +83,10 @@ public class CardCheckerTest {
         Assert.assertEquals(CardCombination.FOUR_OF_KIND, combination1);
         CardCombination combination2 = mCardChecker.getCombination(Arrays.asList(CardModel.ACE, CardModel.QUEEN, CardModel.JACK, CardModel.KING, CardModel.TEN));
         Assert.assertNotEquals(CardCombination.FOUR_OF_KIND, combination2);
+    }
+
+    @Test(expected = CheatingDeckOfCardsException.class)
+    public void testSharperDeck() {
+        mCardChecker.getCombination(Arrays.asList(CardModel.ACE, CardModel.ACE, CardModel.ACE, CardModel.ACE, CardModel.ACE));
     }
 }

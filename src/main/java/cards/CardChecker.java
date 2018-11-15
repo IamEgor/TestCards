@@ -1,5 +1,9 @@
 package cards;
 
+import cards.exception.CheatingDeckOfCardsException;
+import cards.exception.ImpossibleCountOfRepeatingCards;
+import cards.exception.MalformedCardListException;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -10,32 +14,35 @@ import java.util.stream.Collectors;
 
 public class CardChecker {
 
-    public CardCombination getCombination(List<CardModel> cardModels) {
 
-        // CR: The method should declare that it's throwing these exceptions, and they should be handled by the calling method
-        // Also you can define your own poker exceptions, and they can be different exceptions for each case
-        if (cardModels == null || cardModels.size() == 0) {
-            throw new IllegalStateException("You should provide card set");
-        } else if (cardModels.size() != 5) {
-            throw new IllegalStateException("You should provide 5 cards");
+    /**
+     * @param cardsList list of cards
+     * @return CardCombination
+     * @throws MalformedCardListException   if your list of cards is empty or its size is not equals to 5
+     * @throws CheatingDeckOfCardsException if you have provided 5 card with the same rank
+     */
+    public CardCombination getCombination(List<CardModel> cardsList) throws MalformedCardListException, CheatingDeckOfCardsException {
+
+        if (cardsList == null || cardsList.size() == 0) {
+            throw new MalformedCardListException("You should provide card set");
+        } else if (cardsList.size() != 5) {
+            throw new MalformedCardListException("You should provide 5 cards");
         }
 
 
-        // CR: Typo: it's spelled "Straight"
-        if (isStreet(cardModels)) {
-            return CardCombination.STREET;
+        if (isStraight(cardsList)) {
+            return CardCombination.STRAIGHT;
         }
-
 
         Collector<CardModel, ?, Map<CardModel, Long>> collector = Collectors.groupingBy(Function.identity(), Collectors.counting());
-        Map<CardModel, Long> groupedCardModel = cardModels.stream().collect(collector);
-
-        System.out.println(groupedCardModel);
+        Map<CardModel, Long> groupedCardModel = cardsList.stream().collect(collector);
 
         Set<Map.Entry<CardModel, Long>> groupedCardModelEntries = groupedCardModel.entrySet();
 
-        switch (groupedCardModelEntries.size()) {
-            // CR: Please move to constants that describe what each case represents
+        final int numberOfRepeatingItems = groupedCardModelEntries.size();
+        switch (numberOfRepeatingItems) {
+            case 1:
+                throw new CheatingDeckOfCardsException("You have provided 5 card with the same rank!");
             case 2:
                 if (isFourOfKind(groupedCardModelEntries)) {
                     return CardCombination.FOUR_OF_KIND;
@@ -50,35 +57,33 @@ public class CardChecker {
                 }
             case 4:
                 return CardCombination.PAIR;
-            default:
-                // CR: this should also should be an exception like "You should provide 5 cards" is an exception
+            case 5:
                 return CardCombination.NO_COMBINATION;
+            default:
+                throw new ImpossibleCountOfRepeatingCards(numberOfRepeatingItems);
         }
     }
 
-    private boolean isStreet(List<CardModel> cardModels) {
+    private boolean isStraight(List<CardModel> cardsList) {
 
-        List<Integer> cardModelStrengthList = cardModels.stream()
-                .sorted(new StreetComparator())
-                // CR: getStrength - a card strength is called "Rank"
-                .map(CardModel::getStrength)
+        List<Integer> cardsListRankList = cardsList.stream()
+                .sorted(new StraightComparator())
+                .map(CardModel::getRank)
                 .collect(Collectors.toList());
 
-        boolean isStreet = true;
-        int previousStrength = -1;
-        for (Integer strength : cardModelStrengthList) {
-            if (previousStrength != -1 && strength != previousStrength + 1) {
-                isStreet = false;
+        boolean isStraight = true;
+        int previousRank = -1;
+        for (Integer rank : cardsListRankList) {
+            if (previousRank != -1 && rank != previousRank + 1) {
+                isStraight = false;
                 break;
             }
-            previousStrength = strength;
+            previousRank = rank;
         }
 
-        return isStreet;
+        return isStraight;
     }
 
-    // CR: in getCombination() you are receiving a List and not a set?
-    // is there a reason for the difference?
     private boolean isFourOfKind(Set<Map.Entry<CardModel, Long>> entries) {
         return isNumOfKind(entries, 4);
     }
@@ -105,5 +110,4 @@ public class CardChecker {
         List<CardModel> cardModels2 = Arrays.asList(CardModel.ACE, CardModel.JACK, CardModel.FIVE, CardModel.ACE, CardModel.TEN);
         System.out.println(cardChecker.getCombination(cardModels2));
     }
-
 }
