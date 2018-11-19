@@ -3,6 +3,7 @@ package cards;
 import cards.exception.CheatingDeckOfCardsException;
 import cards.exception.ImpossibleCountOfRepeatingCards;
 import cards.exception.MalformedCardListException;
+import cards.utils.Constans;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class CardChecker {
-
 
     /**
      * @param cardsList list of cards
@@ -37,27 +37,25 @@ public class CardChecker {
         Collector<CardModel, ?, Map<CardModel, Long>> collector = Collectors.groupingBy(Function.identity(), Collectors.counting());
         Map<CardModel, Long> groupedCardModel = cardsList.stream().collect(collector);
 
-        Set<Map.Entry<CardModel, Long>> groupedCardModelEntries = groupedCardModel.entrySet();
-
-        final int numberOfRepeatingItems = groupedCardModelEntries.size();
+        final int numberOfRepeatingItems = groupedCardModel.size();
         switch (numberOfRepeatingItems) {
-            case 1:
+            case Constans.ONE_UNIQUE_CARD_IN_HAND:
                 throw new CheatingDeckOfCardsException("You have provided 5 card with the same rank!");
-            case 2:
-                if (isFourOfKind(groupedCardModelEntries)) {
+            case Constans.TWO_UNIQUE_CARDS_IN_HAND:
+                if (isFourOfKind(groupedCardModel)) {
                     return CardCombination.FOUR_OF_KIND;
                 } else {
                     return CardCombination.FULL_HOUSE;
                 }
-            case 3:
-                if (isThreeOfKind(groupedCardModelEntries)) {
+            case Constans.THREE_UNIQUE_CARDS_IN_HAND:
+                if (isThreeOfKind(groupedCardModel)) {
                     return CardCombination.THREE_OF_KIND;
                 } else {
                     return CardCombination.TWO_PAIRS;
                 }
-            case 4:
+            case Constans.FOUR_UNIQUE_CARDS_IN_HAND:
                 return CardCombination.PAIR;
-            case 5:
+            case Constans.FIVE_UNIQUE_CARDS_IN_HAND:
                 return CardCombination.NO_COMBINATION;
             default:
                 throw new ImpossibleCountOfRepeatingCards(numberOfRepeatingItems);
@@ -84,17 +82,18 @@ public class CardChecker {
         return isStraight;
     }
 
-    private boolean isFourOfKind(Set<Map.Entry<CardModel, Long>> entries) {
-        return isNumOfKind(entries, 4);
+    private boolean isFourOfKind(Map<CardModel, Long> cardHandMap) {
+        return isNumOfKind(cardHandMap, 4);
     }
 
-    private boolean isThreeOfKind(Set<Map.Entry<CardModel, Long>> entries) {
-        return isNumOfKind(entries, 3);
+    private boolean isThreeOfKind(Map<CardModel, Long> cardHandMap) {
+        return isNumOfKind(cardHandMap, 3);
     }
 
-    private boolean isNumOfKind(Set<Map.Entry<CardModel, Long>> entries, int numberOfRepetitions) {
+    private boolean isNumOfKind(Map<CardModel, Long> cardHandMap, int numberOfRepetitions) {
+        Set<Map.Entry<CardModel, Long>> cardHandMapEntries = cardHandMap.entrySet();
         boolean isThreeOfKind = false;
-        for (Map.Entry<CardModel, Long> entry : entries) {
+        for (Map.Entry<CardModel, Long> entry : cardHandMapEntries) {
             if (entry.getValue() == numberOfRepetitions) {
                 isThreeOfKind = true;
                 break;
